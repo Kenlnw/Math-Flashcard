@@ -11,6 +11,10 @@ class MathFlashcard(tk.Tk):
         self.frame = tk.Frame(self)
         self.frame.pack(fill="both", expand=True)
 
+        #create frame for timer
+        self.timer_frame = tk.Frame(self)
+        self.timer_frame.pack(fill="x", side="bottom")
+
         self.default_font = tkfont.nametofont("TkDefaultFont")
         self.default_font.configure(size=20)
 
@@ -19,7 +23,14 @@ class MathFlashcard(tk.Tk):
 
         self.difficulty = ["Easy", "Normal", "Hard"]
 
+        self.time = 0
+        self.timer_label:tk.Label
+
+        self.is_flashcard_started = False
+
         self.menu_page()
+
+        
     
     def menu_page(self):
         #create a menu label
@@ -27,7 +38,32 @@ class MathFlashcard(tk.Tk):
 
         for i in range(len(self.difficulty)):
             #create menu buttons
-            tk.Button(self.frame, text=self.difficulty[i], command=lambda difficulty_level=i + 1: self.generate_flashcard(difficulty_level)).pack(pady=5)
+            tk.Button(self.frame, text=self.difficulty[i], command=lambda difficulty_level=i + 1: self._start_flashcard(difficulty_level)).pack(pady=5)
+
+    def _start_flashcard(self, difficulty_level):
+        self.generate_flashcard(difficulty_level)
+
+        #set timer label to default
+        self.timer_label = tk.Label(self.timer_frame, text="00:00")
+        self.timer_label.pack()
+
+        self.is_flashcard_started = True
+
+        self._timer_countup()
+
+    def _timer_countup(self):
+        #change curent time(seconds) to XX:YY patterns
+        mins, secs = divmod(self.time, 60)
+        self.timer_label.config(text=f"{mins:02d}:{secs:02d}")
+
+        self.time += 1
+
+        if self.is_flashcard_started:
+            #make it can do from the background that can run while others jobs is still running
+            self.timer_job = self.after(1000, self._timer_countup)
+
+    def _timer_stop(self):
+        self.is_flashcard_started = False
     
     def generate_flashcard(self, difficulty_level):
         self.reload_page()
@@ -68,7 +104,11 @@ class MathFlashcard(tk.Tk):
         entry.focus()   #when you open the window, cursor will always focus on the answer box immediately
 
         #create a Submit button for check the answer
-        tk.Button(self.frame, width=5, text="Submit", command=lambda: self.check_ans(ans, correct_ans, difficulty_level)).pack(pady=30)
+        tk.Button(self.frame, text="Submit", command=lambda: self.check_ans(ans, correct_ans, difficulty_level)).pack(pady=(30, 5))
+
+    def reload_page(self):
+        for widget in self.frame.winfo_children():
+            widget.destroy()
 
     def check_ans(self, ans, correct_ans, difficulty_level):
         #change user's answer from str to int
@@ -95,11 +135,6 @@ class MathFlashcard(tk.Tk):
         
         # If not found, create and show it
         tk.Label(self.frame, text=text).pack()
-        
-    def reload_page(self):
-        for item in self.frame.winfo_children():
-            item.destroy()
-
 
 def main():
     app = MathFlashcard()
