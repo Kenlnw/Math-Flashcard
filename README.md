@@ -12,8 +12,8 @@ A simple and interactive math flashcard application built using Python's Tkinter
 
 ## Screenshots
 
-![Menu Screenshot](./pics/menu_page.png)
-![Flashcard Screenshot](./pics/flashcard_page.png)
+![Menu Screenshot](./Images/menu_page.png)
+![Flashcard Screenshot](./Images/flashcard_page.png)
 
 ## Requirements
 
