@@ -1,7 +1,7 @@
 import numpy as np
 import tkinter as tk
 import tkinter.font as tkfont
-from card import CardHandle
+from .card import CardHandle
 
 class MathFlashcard(tk.Tk):
     def __init__(self):

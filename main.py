@@ -1,4 +1,4 @@
-from app import MathFlashcard
+from src import MathFlashcard
 
 def main():
     app = MathFlashcard()
