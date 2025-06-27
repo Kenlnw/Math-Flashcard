@@ -2,6 +2,7 @@ import numpy as np
 import tkinter as tk
 import tkinter.font as tkfont
 from .card import CardHandle
+from .timer import Timer
 
 class MathFlashcard(tk.Tk):
     def __init__(self):
@@ -12,9 +13,8 @@ class MathFlashcard(tk.Tk):
         self.frame = tk.Frame(self)
         self.frame.pack(fill="both", expand=True)
 
-        #create frame for timer
-        self.timer_frame = tk.Frame(self)
-        self.timer_frame.pack(fill="x", side="bottom")
+        #create timer
+        self.Timer = Timer(self)
 
         self.default_font = tkfont.nametofont("TkDefaultFont")
         self.default_font.configure(size=20)
@@ -24,12 +24,8 @@ class MathFlashcard(tk.Tk):
 
         self.difficulty = ["Easy", "Normal", "Hard"]
 
-        self.time = 0
-        self.timer_label:tk.Label
-
-        self.is_flashcard_started = False
-
         self.cards:list[CardHandle] = []
+        self.cards_limit = 10
         self.current_card:CardHandle
 
         self.menu_page()
@@ -45,27 +41,8 @@ class MathFlashcard(tk.Tk):
     def _start_flashcard(self, difficulty_level):
         self.generate_flashcard(difficulty_level)
 
-        #set timer label to default
-        self.timer_label = tk.Label(self.timer_frame, text="00:00")
-        self.timer_label.pack()
-
-        self.is_flashcard_started = True
-
-        self._timer_countup()
-
-    def _timer_countup(self):
-        #change curent time(seconds) to XX:YY patterns
-        mins, secs = divmod(self.time, 60)
-        self.timer_label.config(text=f"{mins:02d}:{secs:02d}")
-
-        self.time += 1
-
-        if self.is_flashcard_started:
-            #make it can do from the background that can run while others jobs is still running
-            self.timer_job = self.after(1000, self._timer_countup)
-
-    def _timer_stop(self):
-        self.is_flashcard_started = False
+        #set timer
+        self.Timer.timer_start()
     
     def generate_flashcard(self, difficulty_level):
         self.reload_page()
