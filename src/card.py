@@ -14,6 +14,7 @@ class CardHandle:
         self.op_index:int
 
         self.correct_ans:int
+        self.ans:str
         self.is_correct = False
 
     def _generate_number(self)->int:

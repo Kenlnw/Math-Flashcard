@@ -6,8 +6,6 @@ class Timer:
         self.root = root
 
         self.time = 0
-        self.mins = 0
-        self.secs = 0
 
         self.timer_frame = tk.Frame(self.root)
         self.timer_frame.pack(fill="x", side="bottom")
@@ -26,8 +24,7 @@ class Timer:
 
     def timer_countup(self):
         #change curent time(seconds) to XX:YY patterns
-        self.mins, self.secs = divmod(self.time, 60)
-        self.timer_label.config(text=f"{self.mins:02d}:{self.secs:02d}")
+        self.timer_label.config(text=self.show_time())
         
 
         if self.is_activate:
@@ -50,7 +47,12 @@ class Timer:
         self.timer_stop()
 
         self.time = 0
+        self.destroy()
+
+    def show_time(self):
+        mins, secs = divmod(self.time, 60)
+        return f"{mins:02d}:{secs:02d}"
+    
+    def destroy(self):
         self.timer_label.destroy()
         self.timer_label = None
-
-        self.timer_start()
