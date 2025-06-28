@@ -1,10 +1,10 @@
-import numpy as np
 import tkinter as tk
 import tkinter.font as tkfont
 from .card_page import CardPage
 from .timer import Timer
 from .menu_page import MenuPage
 from .result_page import ResultPage
+from .status_page import StatusPage
 
 class MathFlashcard(tk.Tk):
     def __init__(self):
@@ -15,6 +15,8 @@ class MathFlashcard(tk.Tk):
         self.MenuPage:MenuPage = None
 
         self.ResultPage:ResultPage = None
+
+        self.StatusPage:StatusPage = None
 
         #create timer
         self.Timer = Timer(self)
@@ -30,7 +32,7 @@ class MathFlashcard(tk.Tk):
         self.cards:list[CardPage] = []
         self.cards_limit = 10
         self.cards_correct:int = 0
-        self.cards_num_label:tk.Label
+        self.cards_num_label:tk.Label = None
         self.current_card:CardPage = None
 
         self.menu_page()
@@ -50,23 +52,28 @@ class MathFlashcard(tk.Tk):
         self.delete_page(self.current_card)
         self.delete_page(self.MenuPage)
 
-        score = len(self.cards)
+        score = self.cards_correct
         max_score = self.cards_limit
 
         self.ResultPage = ResultPage(self, self.Timer, score, max_score, self.menu_page)
 
         self.key_pressed("Escape", lambda: self.destroy())
 
+    def status_page(self, text):
+        self.delete_page(self.current_card)
+
+        self.StatusPage = StatusPage(self, text, self.Timer, self.create_flashcard, self.current_card.difficulty_level)
+
 
     def _start_flashcard(self, difficulty_level):
         self.delete_page(self.MenuPage)
-        self.generate_flashcard(difficulty_level)
+        self.create_flashcard(difficulty_level)
 
-        #set timer
+        # #set timer
         self.Timer.timer_start()
     
-    def generate_flashcard(self, difficulty_level):
-        self.delete_page(self.current_card)
+    def create_flashcard(self, difficulty_level):
+        self.delete_page(self.StatusPage)
 
         self.cards.append(CardPage(self, difficulty_level))
 
@@ -75,21 +82,10 @@ class MathFlashcard(tk.Tk):
         self.cards_num_label = tk.Label(self.current_card, text=f"{len(self.cards):02d}/{self.cards_limit:02d}")
         self.cards_num_label.pack(fill="x", side="top")
 
-        self.current_card.generate_card()
-
-        #user's answer(in string)
-        ans = tk.StringVar()
-
-        #create a anser box
-        entry = tk.Entry(self.current_card, width=5, textvariable=ans)
-        entry.pack()
-        entry.focus()   #when you open the window, cursor will always focus on the answer box immediately
-
-        #create a Submit button for check the answer
-        tk.Button(self.current_card, text="Submit", command=lambda: self.check_ans(ans)).pack(pady=(30, 5))
+        self.current_card.create_card(self.check_ans)
 
         #Handle when user press enter to submit
-        self.key_pressed("Return", lambda: self.check_ans(ans))
+        self.key_pressed("Return", lambda: self.check_ans(self.current_card.ans))
 
         #Handle when user press esc to quit
         self.key_pressed("Escape", lambda: self.destroy())
@@ -112,15 +108,32 @@ class MathFlashcard(tk.Tk):
         try:
             ans_value = int(ans.get())
         except ValueError:
-            self.current_card.handle_wrong()
+            self._handle_error_answer(ans)
             return
 
-        if ans_value == self.current_card.correct_ans:
-            if len(self.cards) == self.cards_limit:
-                self.Timer.timer_stop()
-                self.result_page()
-            else:
-                self.current_card.handle_correct()
-                self.generate_flashcard(self.current_card.difficulty_level)
+        if len(self.cards) == self.cards_limit:
+            self.Timer.timer_stop()
+            self.result_page()
         else:
-            self.current_card.handle_wrong()
+            if ans_value == self.current_card.correct_ans:
+                self.cards_correct += 1
+                self.current_card.is_correct = True
+                self.status_page("Correct!")
+            else:
+                self.current_card.is_correct = False
+                self.status_page("Wrong!")
+        
+
+    def _handle_error_answer(self, ans):
+        self._show_message("Try again!")
+        ans.set("")
+
+    def _show_message(self, text):
+        # Check if a label with this text already exists
+        for widget in self.current_card.winfo_children():
+            if isinstance(widget, tk.Label) and widget.cget("text") == text:
+                return  # Message already exists, do nothing
+        
+        # If not found, create and show it
+        try_again_font = tkfont.Font(size=15)
+        tk.Label(self.current_card, text=text, font=try_again_font).pack()

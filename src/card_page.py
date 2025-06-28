@@ -8,14 +8,14 @@ class CardPage(tk.Frame):
 
         self.difficulty_level = difficulty_level
 
-        self.num1:int
-        self.num2:int
+        self.num1:int = None
+        self.num2:int = None
 
         self.op = ["+", "-", "×", "÷"]
-        self.op_index:int
+        self.op_index:int = None
 
-        self.correct_ans:int
-        self.ans:str
+        self.correct_ans:int = None
+        self.ans:str = None
         self.is_correct = None
 
     def _generate_number(self)->int:
@@ -53,7 +53,7 @@ class CardPage(tk.Frame):
         
         return self.num1 // self.num2
 
-    def generate_card(self):
+    def create_card(self, function):
         tk.Label(self, text="What is the correct answer of this?").pack(padx=5, pady=30)
 
         self.op_index = np.random.randint(0, len(self.op))
@@ -64,11 +64,16 @@ class CardPage(tk.Frame):
 
         tk.Label(self, text=f"{self.num1} {self.op[self.op_index]} {self.num2} = ").pack()
 
-    def handle_correct(self):
-        self.is_correct = True
+        #user's answer(in string)
+        self.ans = tk.StringVar()
 
-    def handle_wrong(self):
-        self.is_correct = False
+        #create a anser box
+        entry = tk.Entry(self, width=5, textvariable=self.ans)
+        entry.pack()
+        entry.focus()   #when you open the window, cursor will always focus on the answer box immediately
+
+        #create a Submit button for check the answer
+        tk.Button(self, text="Submit", command=lambda: function(self.ans)).pack(pady=(10, 5))
 
     def __str__(self):
         return "CardPage"
