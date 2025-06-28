@@ -1,9 +1,10 @@
 import numpy as np
 import tkinter as tk
 
-class CardHandle:
-    def __init__(self, frame, difficulty_level=0):
-        self.frame = frame
+class CardPage(tk.Frame):
+    def __init__(self, root, difficulty_level=0):
+        super().__init__(root)
+        self.pack(fill="both", expand=True)
 
         self.difficulty_level = difficulty_level
 
@@ -15,7 +16,7 @@ class CardHandle:
 
         self.correct_ans:int
         self.ans:str
-        self.is_correct = False
+        self.is_correct = None
 
     def _generate_number(self)->int:
         return np.random.randint(np.power(10, self.difficulty_level - 1) + 1, np.power(10, self.difficulty_level) + 1)
@@ -53,7 +54,7 @@ class CardHandle:
         return self.num1 // self.num2
 
     def generate_card(self):
-        tk.Label(self.frame, text="What is the correct answer of this?").pack(padx=5, pady=30)
+        tk.Label(self, text="What is the correct answer of this?").pack(padx=5, pady=30)
 
         self.op_index = np.random.randint(0, len(self.op))
         self.num1 = self._generate_number()
@@ -61,11 +62,13 @@ class CardHandle:
 
         self.correct_ans = self._calculate_correct_ans()
 
-        tk.Label(self.frame, text=f"{self.num1} {self.op[self.op_index]} {self.num2} = ").pack()
+        tk.Label(self, text=f"{self.num1} {self.op[self.op_index]} {self.num2} = ").pack()
 
     def handle_correct(self):
         self.is_correct = True
-        print(f"The answer is {self.correct_ans}! How smart are you!")
+
+    def handle_wrong(self):
+        self.is_correct = False
 
     def __str__(self):
-        return f"{self.num1} {self.op[self.op_index]} {self.num2}"
+        return "CardPage"

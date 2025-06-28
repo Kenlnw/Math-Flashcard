@@ -6,6 +6,7 @@ class Timer:
         self.root = root
 
         self.time = 0
+        # self.best_time = None
 
         self.timer_frame = tk.Frame(self.root)
         self.timer_frame.pack(fill="x", side="bottom")
@@ -56,3 +57,10 @@ class Timer:
     def destroy(self):
         self.timer_label.destroy()
         self.timer_label = None
+
+    # def is_new_record(self):
+    #     return self.best_time is None or self.time < self.best_time
+
+    # def calculate_best_time(self):
+    #     if self.is_new_record():
+    #         self.best_time = self.time
